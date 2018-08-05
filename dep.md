@@ -41,7 +41,7 @@ golang 最原始的依赖管理是 go get ，执行命令后会拉取代码放�
         └── yaml.v2
 
 ```
-项目目录 $GOPATH/src/projectname/.
+项目目录 $GOPATH/src/projectname/.
 
 ### Getting Started
 
@@ -95,11 +95,62 @@ git checkout master
 推荐使用上述第二种目录结构 
 
 ``` sh
-mkdir $GOPATH/src/example
-cd $GOPATH/src/example
+mkdir $GOPATH/src/example
+cd $GOPATH/src/example
 dep init
 
 # 生成 vendor/ 目录下 Gopkg.toml Gopkg.lock
 ```
 
+### 使用流程
+
+#### Usage
+
+```sh
+Dep is a tool for managing dependencies for Go projects
+
+Usage: "dep [command]"
+
+Commands:
+  init     Set up a new Go project, or migrate an existing one
+  status   Report the status of the project's dependencies
+  ensure   Ensure a dependency is safely vendored in the project
+  prune    Pruning is now performed automatically by dep ensure.
+  version  Show the dep version information
+
+Examples:
+  dep init                               set up a new project
+  dep ensure                             install the project's dependencies
+  dep ensure -update                     update the locked versions of all dependencies
+  dep ensure -add github.com/pkg/errors  add a dependency to the project
+
+Use "dep help [command]" for more information about a command.
+```
+
+#### 获取依赖策略
+
+- 获取最新*TAG*的依赖包
+> dep ensure -add github.com/gin-gonic/gin
+
+- 获取*指定分支*的依赖包
+> dep ensure -add github.com/gin-gonic/gin@master
+
+- 获取*指定TAG*的依赖包
+> dep ensure -add github.com/gin-gonic/gin@V1.2
+
+- 获取*指定TAG以上*的依赖包
+> dep ensure -add github.com/gin-gonic/gin@^V1.2
+
+- 获取依赖包的 *子包*
+> dep ensure -add github.com/prometheus/client_golang/prometheus/push 
+> 获取两个子包的情况
+> dep ensure -add github.com/prometheus/client_golang/prometheus/push github.com/prometheus/client_golang/prometheus/promhttp 
+
+获取过程：根据命令先判断本地是否有缓存(缓存地址：$GOPATH/src/dep),存在则直接使用缓存，不存在则，先获取 git 版本/分支/tag 根据命令找到对应的版本下载。
+
+## FQAs
+1. 当拉取过程中如果出现 timeout 则请自备梯子.
+2. 当拉取出现未知的错误，可以先手动删除 缓存 在尝试一次
+3. 当出现 *build.NoGoError 错误，可能是 build 时当前依赖包并没有 main 函数，这种情况一般是需要拉取依赖包的子包
+4. 当已存在的项目 dep init 会遍历当前项目的依赖包，并下载，所以时间会很久
 
